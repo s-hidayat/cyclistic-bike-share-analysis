@@ -1,0 +1,320 @@
+---
+title: "Analisis Berbagi Sepeda Cyclistic"
+author: "Samsur Hidayat"
+output: 
+  html_document:
+    code_folding: hide  
+    theme: united
+    highlight: tango
+---
+
+### 1. Ringkasan Eksekutif
+
+Proyek ini adalah studi kasus untuk program *Google Data Analytics Capstone*. Tujuan analisis ini adalah untuk memahami bagaimana pelanggan *Casual* dan *Member* tahunan menggunakan sepeda secara berbeda.
+
+1.  Tujuan Bisnis\
+    Meningkatkan profitabilitas jangka panjang perusahaan dengan memaksimalkan jumlah member melalui konversi pengendara casual.
+
+2.  Pertanyaan Kunci\
+    Bagaimana perilaku pengguna *casual* berbeda dari *member*?
+
+3.  Target Akhir\
+    Merancang strategi pemasaran untuk mengubah pengendara casual menjadi member tahunan.
+
+### 2. Persiapan Data (Prepare)
+
+Laporan ini menggunakan data perjalanan historis dari **Cyclistic**, sebuah perusahaan berbagi sepeda fiksi yang berbasis di Chicago. Saya memverifikasi integritas data menggunakan kerangka kerja **ROCCC** untuk memastikan kualitas analisis.
+
+1.  Sumber dan Lisensi Data
+
+    -   **Penyedia Data**: Data ini disediakan oleh **Motivate International Inc.**.
+
+    -   **Cakupan Waktu**: Data yang dianalisis mencakup periode **12 bulan terakhir** (2025) perjalanan bersepeda.
+
+    -   **Status Hukum**: Ini adalah data publik yang dapat digunakan secara bebas untuk mengeksplorasi perbedaan perilaku antara berbagai jenis pelanggan.
+
+2.  Komposisi dan Organisasi Data
+
+    -   **Struktur**: Data diatur dalam format file **.CSV** dan dibagi perbulan yang berisi informasi geografis dan waktu untuk setiap perjalanan.
+
+    -   **Variabel Kunci**: Kolom utama yang digunakan mencakup waktu mulai/berakhir perjalanan (`started_at` dan `ended_at`), serta kategori pengguna (`member_casual`) yang membedakan antara anggota tahunan dan pengendara kasual.
+
+3.  Privasi dan Etika
+
+    -   **Privasi Data**: Sesuai dengan aturan privasi data, informasi pengenal pribadi (PII) pengendara **tidak disertakan**.
+
+    -   **Keterbatasan**: Karena anonimitas ini, analisis tidak dapat menentukan apakah pengendara kasual tinggal di area layanan Cyclistic atau frekuensi pembelian tiket tunggal secara individu.
+
+### 3. Pembersihan Data (Process)
+
+1.  Mengingat data Cyclistic terdiri dari 12 file terpisah dengan volume total jutaan baris , langkah pertama yang saya lakukan dalam tahap **Process** adalah memastikan integritas skema. Saya perlu memverifikasi bahwa seluruh file memiliki struktur kolom dan tipe data yang seragam sebelum melakukan penggabungan dengan kueri berikut ini.
+
+    ```{r, engine='sql', connection='con', eval=FALSE}
+    -- Mengintip struktur kolom dari seluruh file CSV secara otomatis menggunakan DuckDB
+    DESCRIBE SELECT * FROM read_csv_auto('D:/lokasi data/file_csv/*.csv');
+
+    ```
+
+    Berdasarkan hasil audit menggunakan fungsi `DESCRIBE` dan `read_csv_auto`, terkonfirmasi bahwa seluruh 12 file memiliki 13 kolom yang identik dengan tipe data `TIMESTAMP` pada kolom waktu. Hal ini menjamin bahwa proses penggabungan data (Data Union) nantinya tidak akan mengalami kegagalan skema.
+
+2.  Query yang digunakan untuk penggabungan data dan juga validasi penggabungan.
+
+```{r, engine='sql', connection='con', eval=FALSE}
+    -- Membuat tabel master permanen dari gabungan 12 file
+    CREATE TABLE all_trips_raw AS 
+    SELECT * FROM read_csv_auto('D:/lokasi data/file_csv/*.csv')
+
+    -- 1. Mengecek total baris 
+    SELECT COUNT(*) AS total_rows FROM all_trips_raw;
+
+    -- 2. Memastikan distribusi data per bulan 
+    SELECT 
+        extract(month from started_at) as bulan, 
+        count(*) as jumlah_per_bulan
+    FROM all_trips_raw
+    GROUP BY bulan
+    ORDER BY bulan;
+
+```
+
+Setelah memvalidasi skema data, saya menggabungkan 12 dataset bulanan menjadi satu tabel master bernama `all_trips_raw`. Dengan menggunakan fungsi `read_csv_auto` pada DuckDB, proses penggabungan dilakukan secara otomatis dengan tetap mempertahankan integritas tipe data pada setiap kolom dan menghasilkan ***5.552.994*** total baris.
+
+3.  Proses pembersihan data dengan SQL (DuckDB).
+
+    -   Pemeriksaan Duplikasi
+
+```{r, engine='sql', connection='con', eval=FALSE}
+        -- 1. Membuat tabel baru yang bersih dari baris duplikat identik (exact match)
+        CREATE TABLE all_trips_cleaned AS
+        SELECT DISTINCT * FROM all_trips_raw;
+
+        -- 2. Memvalidasi integritas Primary Key: Memastikan tidak ada ride_id yang ganda di tabel bersih
+        SELECT ride_id, COUNT(*) AS jumlah_muncul
+        FROM all_trips_cleaned
+        GROUP BY ride_id
+        HAVING COUNT(*) > 1;
+```
+
+Saya menghapus baris duplikat identik menggunakan `SELECT DISTINCT`. Setelah itu, saya menjalankan kueri validasi pada `ride_id` untuk memastikan tidak ada ID perjalanan yang terduplikasi. Hasil kueri validasi mengembalikan nol baris, mengonfirmasi integritas data.
+
+-   Pengecekan Logika Waktu & Durasi serta penambahan kolom ride_length_minutes dan day_of_week
+
+```{r, engine='sql', connection='con', eval=FALSE}
+        CREATE OR REPLACE TABLE all_trips_cleaned_v2 AS
+        SELECT 
+            ride_id, 
+            rideable_type, 
+            started_at, 
+            ended_at, 
+            member_casual,
+            start_lat, start_lng, end_lat, end_lng, start_station_name,
+            date_diff('second', started_at, ended_at) / 60.0 AS ride_length_minutes,
+            dayofweek(started_at) AS day_of_week
+        FROM 
+            all_trips_cleaned 
+        WHERE 
+            date_diff('second', started_at, ended_at) > 60      
+            AND 
+            date_diff('second', started_at, ended_at) < 86400;
+```
+
+Setelah melakukan pembersihan maka data yang ada sekarang total menjadi ***5.399.563*** baris.
+
+### 4. Analisis & Visualisasi Statistik (Analyze)
+
+Setelah data mentah diproses dan dibersihkan menggunakan SQL, dataset final kini siap untuk dianalisis. Namun sebelumnya, saya melakukan audit kualitas akhir guna memverifikasi integritas data dan memastikan konsistensi.
+
+```{r data-verification, message=FALSE, warning=FALSE, cache=FALSE}
+# 1. Memuat Library yang dibutuhkan
+library(tidyverse)
+library(lubridate)
+library(scales)
+
+# 2. Memuat Dataset yang sudah dibersihkan dari SQL
+trips <- read_csv("D:/Data Kita/Analis Data/R_projects/data_cleaned/all_trips_cleaned_v2_final.csv", show_col_types = FALSE)
+
+# 3. Verifikasi Kebersihan Data (Quality Check)
+cat("Total Baris Data        :", comma(nrow(trips)), "\n") 
+cat("Durasi Terpendek (Menit):", min(trips$ride_length_minutes), "\n") 
+cat("Durasi Terpanjang (Menit):", max(trips$ride_length_minutes), "\n")
+
+# Melihat struktur data untuk memastikan tipe data sudah sesuai 
+glimpse(trips)
+```
+
+Agar tren mingguan lebih jelas, saya mengonversi format tanggal menjadi nama hari dan merapikan urutan kategori pengendara untuk kebutuhan presentasi.\
+
+```{r}
+# Tahap Finalisasi Data
+trips_viz <- trips %>%
+  mutate(
+    # Mengubah angka hari dari SQL menjadi Nama Hari (Minggu-Sabtu) agar mudah dibaca
+    # week_start = 7 artinya Minggu adalah awal minggu
+    day_name = wday(started_at, label = TRUE, abbr = FALSE, week_start = 7),
+    
+    # Memastikan urutan level member_casual agar konsisten di grafik (Casual dulu, baru Member)
+    member_casual = factor(member_casual, levels = c("casual", "member"))
+  )
+
+# Cek apakah nama hari sudah terbentuk dengan benar
+table(trips_viz$day_name)
+```
+
+1.  **Insight 1: Perbedaan Gaya Berkendara (Durasi)**
+
+    ```{r}
+    # 1. Menghitung Rata-rata Durasi per Tipe User
+    duration_summary <- trips_viz %>%
+      group_by(member_casual) %>%
+      summarise(average_duration = mean(ride_length_minutes), .groups = 'drop')
+
+    # 2. Membuat Grafik Batang (Bar Chart)
+    ggplot(duration_summary, aes(x = member_casual, y = average_duration, fill = member_casual)) +
+      geom_col(width = 0.6, color = "black", alpha = 0.8) +
+      
+      # Menambahkan teks angka di atas batang
+      geom_text(aes(label = round(average_duration, 1)), vjust = -0.5, size = 4, fontface = "bold") +
+      
+      # Mengatur label sumbu X agar berhuruf kapital
+      scale_x_discrete(labels = c("casual" = "Casual", "member" = "Member")) +
+      
+      # Memberi ruang napas di bagian atas grafik agar teks tidak terpotong
+      scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+      
+      # Styling & Konteks Narasi
+      labs(
+        title = "Pengendara Casual Bersepeda 2x Lebih Lama",
+        subtitle = "Rata-rata durasi perjalanan (Menit) sepanjang tahun 2025",
+        x = NULL,
+        y = "Durasi (Menit)"
+      ) +
+      scale_fill_manual(values = c("casual" = "#E69F00", "member" = "#56B4E9")) + 
+      theme_minimal() +
+      theme(
+        legend.position = "none",
+        plot.title = element_text(face = "bold", size = 14),
+        plot.subtitle = element_text(color = "grey40", margin = margin(b = 12)),
+        axis.text.x = element_text(size = 12, face = "bold"),
+        axis.text.y = element_text(size = 10)
+      )
+    ```
+
+2.  **Insight 2: Preferensi Waktu (Pola Mingguan)**
+
+    ```{r}
+    # Membuat Grafik Batang Ganda (Grouped Bar Chart)
+    trips_viz %>%
+      group_by(member_casual, day_name) %>%
+      summarise(number_of_rides = n(), .groups = 'drop') %>%
+      
+      ggplot(aes(x = day_name, y = number_of_rides, fill = member_casual)) +
+      geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+      
+      # Format Axis Y menjadi "K" (Ribuan)
+      scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+      
+      # Styling
+      labs(
+        title = "Lonjakan Pengguna Casual di Akhir Pekan",
+        subtitle = "Total volume perjalanan harian sepanjang tahun 2025",
+        x = NULL,
+        y = "Jumlah Perjalanan"
+      ) +
+      scale_fill_manual(values = c("casual" = "#E69F00", "member" = "#56B4E9"), 
+                        labels = c("Casual", "Member")) +
+      theme_minimal() +
+      theme(
+        legend.position = "top",
+        legend.title = element_blank(),
+        plot.title = element_text(face = "bold", size = 14),
+        axis.text.x = element_text(angle = 45, hjust = 1) # Miringkan teks hari
+      )
+    ```
+
+3.  **Insight 3: Komposisi Pengguna (Market Share)**
+
+    ```{r}
+    # 1. Menghitung Total & Persentase
+    user_composition <- trips_viz %>%
+      count(member_casual) %>%
+      mutate(
+        percentage = n / sum(n),
+        label_text = scales::percent(percentage, accuracy = 1)
+      )
+
+    # Menampilkan angka di konsol (agar tercatat di laporan)
+    print(user_composition)
+
+    # 2. Visualisasi Pie Chart (Donut Chart)
+    ggplot(user_composition, aes(x = 2, y = percentage, fill = member_casual)) +
+      geom_bar(stat = "identity", color = "white", width = 1) + 
+      coord_polar(theta = "y", start = 0) +
+      
+      # Membuat lubang tengah (Donut Style)
+      xlim(0.5, 2.5) +
+      
+      # Menambahkan Label Persentase di tengah area warna
+      geom_text(aes(label = label_text), position = position_stack(vjust = 0.5), color = "white", fontface = "bold", size = 6) +
+      
+      # Styling & Konteks Narasi
+      labs(
+        title = "Dominasi Member vs Potensi Casual",
+        subtitle = "Proporsi total perjalanan sepanjang tahun 2025"
+      ) +
+      scale_fill_manual(
+        values = c("casual" = "#E69F00", "member" = "#56B4E9"),
+        labels = c("Casual", "Member") # Kapitalisasi label legenda
+      ) +
+      theme_void() + # Menghilangkan background kotak (bersih)
+      theme(
+        legend.position = "right",
+        legend.title = element_blank(), # Menghilangkan judul legenda yang kaku
+        plot.title = element_text(face = "bold", size = 16, hjust = 0.5), # Judul rata tengah
+        plot.subtitle = element_text(color = "grey40", hjust = 0.5, margin = margin(b = 15)) # Subtitle rata tengah dengan jarak
+      )
+    ```
+
+4.  **Visualisasi Interaktif & Geospasial (Tableau Dashboard)**
+
+    Untuk analisis yang lebih mendalam mengenai **Lokasi (Geospatial)** dan **Waktu Sibuk (Heatmap)**, saya telah membuat Dashboard Interaktif menggunakan Tableau.
+
+    Dashboard ini menjawab pertanyaan: *"Di mana lokasi favorit pengendara Casual dan kapan tepatnya kita harus menargetkan iklan?"*
+
+    **Catatan:** Gambar di bawah adalah pratinjau statis. Silahkan klik link untuk interaksi penuh.
+
+    ```{r tableau-screenshot, echo=FALSE, fig.align='center', out.width='100%'}
+    # Menggunakan knitr untuk memuat gambar screenshot
+    knitr::include_graphics("D:/Data Kita/Analis Data/R_projects/cyclistic-analysis-portfolio/Dashboard 1.png")
+    ```
+
+[**👉 Klik di sini untuk melihat Dasbor Tableau Interaktif**](https://public.tableau.com/views/All_trip_sepeda/Dashboard1?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+
+**Temuan Visual dari Dashboard:**
+
+1.  **Hotspot Lokasi (Map):** Pengguna Casual sangat terkonsentrasi di sepanjang **garis pantai** dan area rekreasi terbuka, sangat kontras dengan Member yang tersebar merata di **pusat kota** dan area perkantoran.
+
+2.  **Peta Panas Waktu (Heatmap):** Aktivitas Casual memuncak pada pukul 10:00 - 16:00 di akhir pekan, sedangkan Member memiliki pola komuter (08:00 & 17:00).
+
+3.  **Tren Musiman (Seasonality):** Jumlah perjalanan melonjak drastis pada musim panas (**Juni - Agustus**) dan menurun tajam di musim dingin, menandakan waktu terbaik untuk peluncuran kampanye adalah bulan Mei.
+
+### 5. Rekomendasi Bisnis (Act)
+
+Berdasarkan pola spasial dan temporal yang ditemukan dalam visualisasi (Tableau) dan analisis statistik (R), berikut adalah 3 strategi berbasis data untuk mengonversi Pengguna Casual menjadi Member:
+
+#### 1. Strategi Lokasi: Dominasi Area Pesisir & Rekreasi
+
+-   **Bukti (Map):** Visualisasi peta menunjukkan konsentrasi tinggi pengguna Casual di sepanjang **garis pantai** dan area terbuka, berbeda dengan Member yang menyebar di area perkantoran.
+
+-   **Tindakan:** Prioritaskan pemasangan iklan fisik (Billboards/QR Code) di stasiun-stasiun docking sepanjang **jalur pantai**. Pesan iklan harus bernuansa "Liburan Tanpa Batas" (*Unlimited Leisure Rides*) untuk memikat segmen rekreasi ini.
+
+#### 2. Produk Baru: "Summer Weekend Pass"
+
+-   **Bukti (Heatmap & Seasonality):** Data menunjukkan pengguna Casual memuncak drastis pada **Sabtu-Minggu** pukul 10:00-16:00, terutama selama bulan **Juni-Agustus**.
+
+-   **Tindakan:** Luncurkan keanggotaan musiman khusus (misal: *Summer Pass* atau *Weekend-Only Membership*). Ini memberikan opsi yang lebih murah daripada Full Membership bagi pengguna yang hanya aktif saat liburan, namun tetap mengikat mereka dalam ekosistem Cyclistic.
+
+#### 3. Insentif Berbasis Durasi (Gamifikasi)
+
+-   **Bukti (Analisis R):** Rata-rata durasi berkendara Casual adalah **2x lebih lama** dibanding Member.
+
+-   **Tindakan:** Ubah durasi panjang tersebut menjadi peluang konversi. Buat tantangan di aplikasi (misal: *"Gowes 10 Jam Bulan Ini"*). Jika pengguna Casual mencapai target tersebut, berikan penawaran diskon khusus untuk upgrade ke Annual Member sebagai "hadiah" atas keaktifan mereka.
