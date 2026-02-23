@@ -55,4 +55,4 @@ Berdasarkan bukti data perilaku, strategi konversi harus menargetkan habitus rek
 3. **Produk Transisi:** Menguji coba tipe keanggotaan baru seperti "Paket Member Akhir Pekan" sebagai jembatan komitmen sebelum pengguna kasual memutuskan untuk mengambil langganan tahunan secara penuh.
 
 ---
-*Silakan hubungi saya melalui [LinkedIn]([linkedin.com/in/s-hidayat-69b1b5372]) jika Anda ingin berdiskusi lebih lanjut mengenai metodologi atau temuan dalam studi kasus ini.*
+*Silakan hubungi saya melalui [LinkedIn](https://www.linkedin.com/in/s-hidayat-69b1b5372) jika Anda ingin berdiskusi lebih lanjut mengenai metodologi atau temuan dalam studi kasus ini.*
