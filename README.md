@@ -8,8 +8,7 @@ Selamat datang di repositori proyek analisis data saya! Proyek ini merupakan pem
 
 Sebagai analis yang berfokus pada *PropTech* (Property Technology) dan memiliki ketertarikan pada arsitektur serta perencanaan ruang kota, saya membedah lebih dari 5,5 juta baris data perjalanan sepeda historis. Tujuannya adalah untuk memahami bagaimana fasilitas infrastruktur mikro ini dimanfaatkan secara berbeda oleh berbagai demografi pengguna di Chicago.
 
-👉 **[Klik di sini untuk membaca Laporan Analisis R Markdown (HTML) secara lengkap](https://s-hidayat.github.io/cyclistic-bike-share-analysis/)** 👉 **[Klik di sini untuk melihat Dasbor Tableau Interaktif]([MASUKKAN_LINK_TABLEAU_ANDA])**
-
+👉 **[Klik di sini untuk membaca Laporan Analisis R Markdown (HTML) secara lengkap](https://s-hidayat.github.io/cyclistic-bike-share-analysis/)**
 ---
 
 ## 🎯 1. Business Task (Tujuan Analisis)
@@ -46,7 +45,6 @@ Dari eksplorasi data menggunakan `ggplot2`, ditemukan tiga pola perilaku utama y
 * **Durasi Berkendara 2x Lipat:** Secara rata-rata, pengendara *Casual* menggunakan sepeda jauh lebih lama dibandingkan *Member* tahunan di setiap perjalanannya.
 * **Dominasi Volume:** Meskipun *Casual* bersepeda lebih lama, komposisi total volume perjalanan tahunan masih didominasi oleh *Member* yang intensitas pemakaiannya lebih sering.
 
-*(Grafik batang ganda dan donut chart tersedia selengkapnya di dalam [Laporan HTML]([MASUKKAN_LINK_GITHUB_PAGES_ANDA]))*
 
 ---
 
@@ -57,4 +55,4 @@ Berdasarkan bukti data perilaku, strategi konversi harus menargetkan habitus rek
 3. **Produk Transisi:** Menguji coba tipe keanggotaan baru seperti "Paket Member Akhir Pekan" sebagai jembatan komitmen sebelum pengguna kasual memutuskan untuk mengambil langganan tahunan secara penuh.
 
 ---
-*Silakan hubungi saya melalui [LinkedIn]([LINK_LINKEDIN_ANDA]) jika Anda ingin berdiskusi lebih lanjut mengenai metodologi atau temuan dalam studi kasus ini.*
+*Silakan hubungi saya melalui [LinkedIn]([linkedin.com/in/s-hidayat-69b1b5372]) jika Anda ingin berdiskusi lebih lanjut mengenai metodologi atau temuan dalam studi kasus ini.*
