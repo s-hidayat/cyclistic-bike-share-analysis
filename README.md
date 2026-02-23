@@ -6,7 +6,9 @@
 
 Selamat datang di repositori proyek analisis data saya! Proyek ini merupakan pemenuhan studi kasus dari **Google Data Analytics Capstone**. 
 
-Sebagai analis yang berfokus pada *PropTech* (Property Technology) dan memiliki ketertarikan pada arsitektur serta perencanaan ruang kota, saya membedah lebih dari 5,5 juta baris data perjalanan sepeda historis. Tujuannya adalah untuk memahami bagaimana fasilitas infrastruktur mikro ini dimanfaatkan secara berbeda oleh berbagai demografi pengguna di Chicago.
+Proyek ini bertujuan untuk memecahkan masalah pemasaran utama Cyclistic: Bagaimana cara mengonversi Pengendara Kasual (Casual Riders) menjadi Anggota Tahunan (Annual Members)?
+
+Menganalisis lebih dari 5,7 juta data perjalanan sepanjang tahun 2025, studi ini mengungkap perbedaan perilaku fundamental antara kedua tipe pengguna—mulai dari kapan mereka berkendara, berapa lama durasinya, hingga di mana lokasi favorit mereka.
 
 👉 **[Klik di sini untuk membaca Laporan Analisis R Markdown (HTML) secara lengkap](https://s-hidayat.github.io/cyclistic-bike-share-analysis/)**
 ---
@@ -26,7 +28,7 @@ Data yang digunakan dalam analisis ini merangkum 12 bulan perjalanan historis se
 
 ---
 
-## 🛠️ 3. Methodology & Cleaning (Changelog)
+## 🛠️ 3. Methodology & Cleaning
 Mengingat volume data yang masif, saya mengombinasikan **SQL (DuckDB)** untuk proses *Data Wrangling* dan **R** untuk verifikasi serta visualisasi statistik. 
 
 Berikut adalah catatan pemrosesan (*Changelog*) untuk memastikan integritas data:
