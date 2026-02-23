@@ -4,7 +4,8 @@
 [![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?style=for-the-badge&logo=duckdb&logoColor=black)]()
 [![Tableau](https://img.shields.io/badge/Tableau-E97627?style=for-the-badge&logo=Tableau&logoColor=white)]()
 
-Proyek Capstone **Google Data Analytics** ini menganalisis >5,5 juta data historis perjalanan berbagi sepeda di Chicago. Proyek ini bertujuan untuk memecahkan masalah pemasaran utama Cyclistic: Bagaimana cara mengonversi Pengendara Kasual (Casual Riders) menjadi Anggota Tahunan (Annual Members)?,
+Proyek Capstone **Google Data Analytics** ini menganalisis >5,5 juta data historis perjalanan berbagi sepeda di Chicago. Proyek ini bertujuan untuk memecahkan masalah pemasaran utama Cyclistic: Bagaimana cara mengonversi Pengendara Kasual (Casual Riders) menjadi Anggota Tahunan (Annual Members)?.
+
 Menganalisis lebih dari 5,7 juta data perjalanan sepanjang tahun 2025, studi ini mengungkap perbedaan perilaku fundamental antara kedua tipe pengguna—mulai dari kapan mereka berkendara, berapa lama durasinya, hingga di mana lokasi favorit mereka.
 
 👉 **[Lihat Laporan R Markdown (HTML) Lengkap](https://s-hidayat.github.io/cyclistic-bike-share-analysis/)** 
