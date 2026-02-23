@@ -8,7 +8,7 @@ Selamat datang di repositori proyek analisis data saya! Proyek ini merupakan pem
 
 Sebagai analis yang berfokus pada *PropTech* (Property Technology) dan memiliki ketertarikan pada arsitektur serta perencanaan ruang kota, saya membedah lebih dari 5,5 juta baris data perjalanan sepeda historis. Tujuannya adalah untuk memahami bagaimana fasilitas infrastruktur mikro ini dimanfaatkan secara berbeda oleh berbagai demografi pengguna di Chicago.
 
-👉 **[Klik di sini untuk membaca Laporan Analisis R Markdown (HTML) secara lengkap]([MASUKKAN_LINK_GITHUB_PAGES_ANDA])** 👉 **[Klik di sini untuk melihat Dasbor Tableau Interaktif]([MASUKKAN_LINK_TABLEAU_ANDA])**
+👉 **[Klik di sini untuk membaca Laporan Analisis R Markdown (HTML) secara lengkap]([https://s-hidayat.github.io/cyclistic-bike-share-analysis/])** 👉 **[Klik di sini untuk melihat Dasbor Tableau Interaktif]([MASUKKAN_LINK_TABLEAU_ANDA])**
 
 ---
 
