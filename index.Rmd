@@ -8,7 +8,7 @@ output:
     highlight: tango
 ---
 
-### 1. Ringkasan Eksekutif
+### 1. Pendahuluan & Objektif Bisnis (Ask)
 
 Proyek ini adalah studi kasus untuk program *Google Data Analytics Capstone*. Tujuan analisis ini adalah untuk memahami bagaimana pelanggan *Casual* dan *Member* tahunan menggunakan sepeda secara berbeda.
 
@@ -23,7 +23,7 @@ Proyek ini adalah studi kasus untuk program *Google Data Analytics Capstone*. Tu
 
 ### 2. Persiapan Data (Prepare)
 
-Laporan ini menggunakan data perjalanan historis dari **Cyclistic**, sebuah perusahaan berbagi sepeda fiksi yang berbasis di Chicago. Saya memverifikasi integritas data menggunakan kerangka kerja **ROCCC** untuk memastikan kualitas analisis.
+Analisis ini menggunakan dataset historis perjalanan Cyclistic (perusahaan bike-sharing di Chicago) selama 12 bulan terakhir. Saya memverifikasi integritas data untuk memastikan data ini kredibel, orisinal, komprehensif, dan terkini untuk memastikan kualitas analisis.
 
 1.  Sumber dan Lisensi Data
 
@@ -118,6 +118,7 @@ Saya menghapus baris duplikat identik menggunakan `SELECT DISTINCT`. Setelah itu
             date_diff('second', started_at, ended_at) < 86400;
 ```
 
+Perjalanan di bawah 60 detik dihapus karena kemungkinan merupakan *false start* atau pengecekan sepeda rusak. Perjalanan lebih dari 86.400 detik (24 jam) dihapus karena mengindikasikan sepeda tidak dikembalikan ke stasiun.\
 Setelah melakukan pembersihan maka data yang ada sekarang total menjadi ***5.399.563*** baris.
 
 ### 4. Analisis & Visualisasi Statistik (Analyze)
@@ -280,14 +281,13 @@ table(trips_viz$day_name)
 
     Dashboard ini menjawab pertanyaan: *"Di mana lokasi favorit pengendara Casual dan kapan tepatnya kita harus menargetkan iklan?"*
 
-    **Catatan:** Gambar di bawah adalah pratinjau statis. Silahkan klik link untuk interaksi penuh.
 
     ```{r tableau-screenshot, echo=FALSE, fig.align='center', out.width='100%'}
     # Menggunakan knitr untuk memuat gambar screenshot
     knitr::include_graphics("D:/Data Kita/Analis Data/R_projects/cyclistic-analysis-portfolio/Dashboard 1.png")
     ```
 
-[**👉 Klik di sini untuk melihat Dasbor Tableau Interaktif**](https://public.tableau.com/views/All_trip_sepeda/Dashboard1?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+[**👉 Akses Dashboard Tableau Interaktif di Sini**](https://public.tableau.com/views/All_trip_sepeda/Dashboard1?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
 
 **Temuan Visual dari Dashboard:**
 
